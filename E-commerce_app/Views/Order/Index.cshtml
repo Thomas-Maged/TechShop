@@ -1,0 +1,163 @@
+﻿@model IEnumerable<OrderSummaryViewModel>
+@{
+    ViewData["Title"] = "Orders";
+}
+
+<div class="container main-content animate-in">
+    <div class="page-header mb-5">
+        <h1 class="display-4"><i class="bi bi-box-seam me-1"></i> Order History</h1>
+        <p class="lead">Manage and track your recent technology purchases</p>
+    </div>
+
+    <div class="card p-4 mb-5 shadow-lg border-color">
+        <form id="filterForm" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label text-secondary small text-uppercase fw-bold">Search Order</label>
+                <div class="input-group">
+                    <input type="text" id="searchOrderNumber" class="form-control-checkout" placeholder="Enter order number...">
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label text-secondary small text-uppercase fw-bold">Filter Status</label>
+                <select id="statusFilter" class="form-control-checkout">
+                    <option value="all">All Orders</option>
+                    <option value="In Queue">In Queue</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Cancelled">Cancelled</option>
+                </select>
+            </div>
+
+            <div class="col-md-4 d-flex gap-2">
+                <button type="button" id="btnSearch" class="btn-primary flex-grow-1 py-2">
+                    <i class="bi bi-search me-2"></i> Search
+                </button>
+                <button type="button" id="btnReset" class="btn-outline py-2">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="order-list">
+        @foreach (var order in Model)
+        {
+            <div class="card mb-4 order-entry" data-order-id="10254">
+            
+                <div class="row align-items-center g-3">
+                    <div class="col-6 col-md-2">
+                        <div class="text-secondary small text-uppercase fw-bold" style="letter-spacing: 1px; opacity: 0.9;">Order #</div>
+                        <div class="text-white fw-bold">@order.OrderNumber</div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="text-secondary small text-uppercase fw-bold" style="letter-spacing: 1px; opacity: 0.9;">Date</div>
+                        <div class="text-white">@order.OrderDate.ToString("dddd dd MMMM yyyy")</div>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <div class="text-secondary small text-uppercase fw-bold" style="letter-spacing: 1px; opacity: 0.9;">Total Price</div>
+                        <div class="product-price" style="font-size: 1.25rem;">$@order.TotalAmount</div>
+                    </div>
+
+                    <div class="col-6 col-md-3">
+                        <div class="text-secondary small text-uppercase fw-bold mb-1" style="letter-spacing: 1px; opacity: 0.9;">Status</div>
+
+                        @{
+                            if (order.Status == E_commerce_entities.Enums.StatusEnum.InQueue)
+                            {
+                                <span class="status-badge status-queue">
+                                    <i class="bi bi-hourglass-split"></i> In Queue
+                                </span>
+                            }
+                            else if (order.Status == E_commerce_entities.Enums.StatusEnum.Completed)
+                            {
+                                <span class="status-badge status-completed">
+                                    <i class="bi bi-check2-circle"></i> Completed
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="status-badge status-cancelled">
+                                    <i class="bi bi-x-circle"></i> Cancelled
+                                </span>
+                            }
+                        }
+
+                        
+
+                    </div>
+                    <div class="col-12 col-md-2 text-md-end">
+                        <a class="btn-outline w-100 view-details-btn" asp-action="orderDetails" asp-route-orderNum="@order.OrderNumber">
+                            View Details
+                        </a>
+                    </div>
+                </div>
+
+            
+            </div>
+        }
+        
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+        // Handle View Details interaction
+        $('.view-details-btn').on('click', function(e) {
+        const $btn = $(this);
+        const orderId = $btn.closest('.order-entry').data('order-id');
+
+        // Apply the loading spinner from your CSS
+        $btn.addClass('loading');
+        
+        console.log("Preparing to load details for Order: #" + orderId);
+
+        // Visual feedback delay
+        setTimeout(() => {
+        // Your logic for navigation goes here:
+        // window.location.href = '/Orders/Details/' + orderId;
+            
+        // To simulate completion if no redirect is present:
+        $btn.removeClass('loading');
+        }, 800);
+        });
+        });
+
+        $(document).ready(function() {
+    // 1. Filtering & Search Logic
+    $('#btnSearch').on('click', function() {
+        const orderNum = $('#searchOrderNumber').val().toLowerCase();
+        const status = $('#statusFilter').val();
+
+        $('.order-entry').each(function() {
+            const currentOrder = $(this).find('.text-white.fw-bold').text().toLowerCase();
+            const currentStatus = $(this).find('.status-badge').text().trim();
+
+            const matchesOrder = orderNum === "" || currentOrder.includes(orderNum);
+            const matchesStatus = status === "all" || currentStatus.includes(status);
+
+            if (matchesOrder && matchesStatus) {
+                $(this).fadeIn(300);
+            } else {
+                $(this).fadeOut(200);
+            }
+        });
+    });
+
+    // 2. Reset Functionality
+    $('#btnReset').on('click', function() {
+        $('#searchOrderNumber').val('');
+        $('#statusFilter').val('all');
+        $('.order-entry').fadeIn(300);
+    });
+
+    // 3. Trigger search on 'Enter' key
+    $('#searchOrderNumber').on('keypress', function(e) {
+        if(e.which == 13) {
+            e.preventDefault();
+            $('#btnSearch').click();
+        }
+    });
+});
+    </script>
+}

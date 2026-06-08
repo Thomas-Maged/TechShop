@@ -1,0 +1,232 @@
+﻿@model CartViewModel
+@{
+    ViewData["Title"] = "Shopping Cart";
+    decimal total = 0;
+    decimal totalSavings = 0;
+}
+
+<!-- Page Header -->
+<div class="page-header mb-4 animate-in">
+    <h1 class="display-4 mb-3">
+        <i class="bi bi-cart3 me-3"></i>Shopping Cart
+    </h1>
+    <p class="lead" style="color: var(--text-secondary);">
+        Review your items and proceed to checkout
+    </p>
+</div>
+
+<div class="cart-container">
+    <div class="row g-4">
+        <!-- Cart Items Section -->
+        <div class="col-lg-8">
+            <div class="cart-items-section animate-in">
+                <h3 class="cart-section-title">
+                    <i class="bi bi-bag-check me-2"></i>Cart Items (@Model.Items.Count())
+                </h3>
+
+                <!-- Cart Item 1 - Regular Price -->
+                <!-- Cart Item 1 - Updated with Edit Button -->
+                @foreach(var cartItem in Model.Items)
+                {
+                    <div class="cart-item" id="cart-item-@cartItem.CartItemID" data-price="@cartItem.UnitPrice" data-old-price="@cartItem.Price">
+                        <input type="hidden" value="@cartItem.ProductID" id="input-productID-cart-@cartItem.CartItemID"/>
+                        <div class="cart-item-image">
+                            <img src="@cartItem.Image"
+                                 alt="UltraBook Pro 15" id="item-image-@cartItem.CartItemID">
+                        </div>
+                        <div class="cart-item-details">
+                            <div class="cart-item-header">
+                                <div class="cart-item-info">
+                                    <div class="cart-item-category">Laptops</div>
+                                    <h5 class="cart-item-name" id="item-name-@cartItem.CartItemID">
+                                        <a asp-controller="Product" asp-action="Details" asp-route-productID="@cartItem.ProductID">
+                                            @cartItem.Name
+                                        </a>
+                                    </h5>
+                                </div>
+                                @if (cartItem.DiscountPercentage > 0)
+                                {
+                                    <div class="cart-item-price-section">
+                                        <div class="cart-item-unit-price">Unit Price</div>
+                                        <div>
+                                            <span class="cart-item-price-old">$@cartItem.Price</span>
+                                            <span class="cart-item-price" id="item-price-@cartItem.CartItemID">$@cartItem.UnitPrice</span>
+                                            <span class="cart-item-discount">-@cartItem.DiscountPercentage%</span>
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="cart-item-price-section">
+                                        <div class="cart-item-unit-price">Unit Price</div>
+                                        <div class="cart-item-price" id="item-price-@cartItem.CartItemID">$@cartItem.UnitPrice</div>
+                                    </div>
+                                }
+                                
+                                   
+                            </div>
+                            <div class="cart-item-footer">
+                                <!-- Quantity Display and Edit Button -->
+                                <div class="cart-quantity-controls">
+                                    <span class="cart-quantity-label">Quantity:</span>
+                                    <button type="button" class="btn-outline btn" style="padding: 0.5rem 1rem;"
+                                            onclick=openQuantityModal("@cartItem.CartItemID")>
+                                        <span id="qty-display-@cartItem.CartItemID">@cartItem.Quantity</span>
+                                        <i class="bi bi-pencil ms-2"></i>
+                                    </button>
+                                </div>
+                                <div class="cart-item-subtotal">
+                                    <span class="cart-item-subtotal-label">Subtotal:</span>
+                                    <span class="cart-item-subtotal-value">$@(cartItem.UnitPrice*cartItem.Quantity)</span>
+                                </div>
+                                <form asp-action="Remove" method="post">
+                                <input type="hidden" name="cartItemID" value="@cartItem.CartItemID" />
+                                <button type="submit" class="btn-remove-item" onclick="removeCartItem(1)">
+                                    <i class="bi bi-trash"></i>
+                                    <span>Remove</span>
+                                </button>
+                                </form>
+                            </div>
+                        </div>
+                        <!-- Hidden input to store actual quantity -->
+                        <input type="hidden" id="qty-@cartItem.CartItemID" value="@cartItem.Quantity">
+                    </div>
+                }
+                
+            </div>
+        </div>
+
+        <!-- Cart Summary Section -->
+        <div class="col-lg-4">
+            <div class="cart-summary animate-in" style="animation-delay: 0.1s;">
+                <h3 class="cart-summary-title">Order Summary</h3>
+
+                <!-- Savings Badge (shown if there are discounts) -->
+                <div class="cart-savings-badge" style="display: block;">
+                    <div class="cart-savings-text">Total Savings</div>
+                    <div class="cart-savings-amount" id="total-savings-amount">$@Model.TotalSavings</div>
+                </div>
+
+                <!-- Summary Rows -->
+                <div class="cart-summary-row">
+                    <span class="cart-summary-label">Shipping</span>
+                    <span class="cart-summary-value" style="color: #22c55e;">FREE</span>
+                </div>
+                
+                <!-- Total -->
+                <div class="cart-total-row">
+                    <span class="cart-total-label">Total</span>
+                    <span class="cart-total-value" id="cart-total">$@Model.TotalPrice</span>
+                </div>
+
+                <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
+
+                <!-- Checkout Button -->
+                <a asp-controller="Order" asp-action="CheckOut" class="btn-primary btn btn-checkout" id="checkoutBtn">
+                    <i class="bi bi-lock-fill"></i>
+                    <span>Proceed to Checkout</span>
+                </a>
+
+                <!-- Continue Shopping -->
+                <a asp-controller="Product" asp-action="Index" asp-route-pg="1" class="btn-outline btn btn-continue-shopping">
+                    <i class="bi bi-arrow-left"></i>
+                    <span>Continue Shopping</span>
+                </a>
+
+                <!-- Trust Badges -->
+                <div class="product-features mt-4">
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+                        <div class="feature-text">
+                            <div class="feature-title">Secure Payment</div>
+                            <div class="feature-description">SSL Encrypted</div>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="bi bi-truck"></i>
+                        </div>
+                        <div class="feature-text">
+                            <div class="feature-title">Free Shipping</div>
+                            <div class="feature-description">On all orders</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quantity Edit Modal -->
+<form asp-controller="Cart" asp-action="UpdateQuantity" method="post">
+    <div class="modal-overlay" id="quantityModal">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h3 class="modal-title">Edit Quantity</h3>
+            <button type="button" class="modal-close" onclick="closeQuantityModal()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <!-- Product Info -->
+            <div class="modal-product-info">
+                <div class="modal-product-image">
+                    <img id="modal-product-image" src="" alt="Product">
+                </div>
+                <div class="modal-product-details">
+                    <div class="modal-product-name" id="modal-product-name"></div>
+                    <div class="modal-product-price" id="modal-product-price"></div>
+                </div>
+            </div>
+
+            <!-- Quantity Controls -->
+            <div class="modal-quantity-section">
+                <label class="modal-quantity-label">Select Quantity</label>
+                <div class="modal-quantity-controls">
+                    <button type="button" class="modal-qty-btn" id="modal-decrease"
+                            onclick="updateModalQuantity(-1)">
+                        <i class="bi bi-dash"></i>
+                    </button>
+                    <div class="modal-qty-display" id="modal-quantity">1</div>
+                    <input type="hidden" name="quantity" id="input-quantity"/>
+                    <input type="hidden" name="productID" id="modal-productID" />
+                    <button type="button" class="modal-qty-btn" id="modal-increase"
+                            onclick="updateModalQuantity(1)">
+                        <i class="bi bi-plus"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-outline btn" onclick="closeQuantityModal()">
+                Cancel
+            </button>
+            <button type="submit" class="btn-primary btn" onclick="saveQuantity()">
+                <i class="bi bi-check2 me-2"></i>Update
+            </button>
+        </div>
+    </div>
+</div>
+</form>
+
+@section Scripts {
+    <script>
+        // ============================================
+        // CART PAGE SPECIFIC JAVASCRIPT
+        // ============================================
+
+        // Initialize cart on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            recalculateCartTotals();
+            updateCartBadge(getCartItemCount());
+        });
+
+        // Checkout button
+        document.getElementById('checkoutBtn').addEventListener('click', function() {
+            // TODO: Navigate to checkout page
+            window.location.href = '/checkout';
+        });
+    </script>
+}

@@ -1,0 +1,159 @@
+﻿@model IEnumerable<Category>
+@{
+    ViewData["Title"] = "Categories";
+}
+
+<div class="container main-content animate-in">
+    <div class="page-header mb-5">
+        <h1 class="display-4"><i class="bi bi-tags me-1"></i> Category Management</h1>
+        <p class="lead">Organize your technology products into distinct groups</p>
+    </div>
+
+    <div class="card p-4 mb-5 shadow-lg border-color">
+        <form method="post" asp-action="Add" id="addCategoryForm" class="row g-3 align-items-end">
+            <div class="col-md-9">
+                <label class="form-label text-secondary small text-uppercase fw-bold">Category Name</label>
+                <input name="categoryName" type="text" id="newCategoryName" class="form-control-checkout" placeholder="e.g., Gaming Laptops" required>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" id="btnAddCategory" class="btn-primary w-100 py-2">
+                    <i class="bi bi-plus-circle me-2"></i> Add Category
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="order-list" id="categoryList">
+        @foreach (var category in Model)
+        {
+            <form method="post" asp-action="Edit">
+            <div class="card mb-3 order-entry category-item" data-id="@category.CategoryID">
+                <div class="row align-items-center g-3">
+                    <div class="col-12 col-md-8">
+                        <div class="text-secondary small text-uppercase fw-bold mb-1" style="letter-spacing: 1px; opacity: 0.9;">Category Name</div>
+                        <div class="text-white fw-bold h5 mb-0 category-name-text">@category.Name</div>
+                        
+                            <input type="text" name="categoryName" class="form-control-checkout d-none edit-category-input" value="@category.Name">
+                        <input type="hidden" name="id" value="@category.CategoryID" />
+                    </div>
+
+                    <div class="col-12 col-md-4 text-md-end">
+                        <div class="action-buttons">
+                            <button type="button" class="btn-outline view-details-btn edit-btn">
+                                <i class="bi bi-pencil-square me-1"></i> Edit
+                            </button>
+                                <button type="button" class="btn-outline text-danger border-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" data-bs-category="@category.Name" data-bs-id="@category.CategoryID">
+                                    <i class="bi bi-trash3 me-2"></i> Delete
+                            </button>
+                        </div>
+                        
+                        <div class="edit-actions d-none gap-2 justify-content-md-end">
+                            <button type="submit" class="btn-primary py-2 px-3 save-btn">Save</button>
+                            <button class="btn-outline py-2 px-3 cancel-btn">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </form>
+        }
+    </div>
+</div>
+
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-card border-color shadow-lg overflow-hidden" style="border-radius: var(--radius-lg);">
+            <div class="modal-header border-bottom border-color p-4">
+                <h5 class="modal-title text-white fw-bold d-flex align-items-center gap-2">
+                    <i class="bi bi-exclamation-triangle-fill text-danger"></i> Confirm Deletion
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <p class="text-secondary mb-0" style="font-size: var(--font-lg); line-height: var(--leading-normal);">
+                    Are you sure you want to delete "<span class="text-white fw-bold" id="categoeyName"></span>" category?
+                    <br>
+                    <small class="text-muted d-block mt-2" style="font-size: var(--font-sm);">This action is permanent and cannot be reversed.</small>
+                </p>
+            </div>
+            <div class="modal-footer border-top border-color p-4 justify-content-center">
+                <button type="button" class="btn-outline px-4 py-3" data-bs-dismiss="modal" style="min-width: 120px; font-weight: 600;">Cancel</button>
+                <form asp-action="Delete" method="post">
+                    <input type="hidden" name="id" id="deleteInput" />
+                    <button asp-action="Delete" type="submit" id="confirmDeleteBtn" class="btn-primary px-4 py-3"
+                           style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); border: none; min-width: 180px; font-weight: 700;">
+                        Delete Permanently
+                    </button>
+                </form>
+                
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts{
+    <script>
+                $(document).ready(function () {
+            // 1. Toggle Edit Mode
+            $(document).on('click', '.edit-btn', function () {
+                const row = $(this).closest('.category-item');
+                row.find('.category-name-text, .action-buttons').addClass('d-none');
+                row.find('.edit-category-input, .edit-actions').removeClass('d-none').addClass('d-flex');
+                row.find('.edit-category-input').focus();
+            });
+
+            // 2. Cancel Edit
+            $(document).on('click', '.cancel-btn', function () {
+                const row = $(this).closest('.category-item');
+                row.find('.edit-category-input, .edit-actions').addClass('d-none').removeClass('d-flex');
+                row.find('.category-name-text, .action-buttons').removeClass('d-none');
+            });
+
+            // 3. Save Edit (Logic Placeholder)
+            $(document).on('click', '.save-btn', function () {
+                const btn = $(this);
+                const row = btn.closest('.category-item');
+                const newName = row.find('.edit-category-input').val();
+
+                btn.addClass('loading').prop('disabled', true);
+
+                console.log("Saving new name: " + newName + " for ID: " + row.data('id'));
+
+                // On success:
+                setTimeout(() => {
+                    row.find('.category-name-text').text(newName);
+                    btn.removeClass('loading').prop('disabled', false);
+                    row.find('.cancel-btn').click();
+                }, 600);
+            });
+
+            // 4. Add Category Interaction
+            $('#btnAddCategory').on('click', function () {
+                const btn = $(this);
+                const form = $('#addCategoryForm'); 
+                const name = $('#newCategoryName').val();
+
+                if (name.trim() === "") {
+                    $('#newCategoryName').addClass('is-invalid');
+                    return;
+                }
+
+                btn.addClass('loading').prop('disabled', true);
+        
+                console.log("Adding new category: " + name);
+                form.submit();
+
+            });
+        });
+
+        const deleteModal = document.getElementById("deleteModal");
+        deleteModal.addEventListener("show.bs.modal", event =>{
+            const button = event.relatedTarget;
+            const catName = button.getAttribute('data-bs-category');
+            const catID = button.getAttribute("data-bs-id");
+            const inputVal = document.getElementById("categoeyName");
+            const deleteInput = document.getElementById("deleteInput");
+            inputVal.textContent = catName;
+            deleteInput.setAttribute("value", catID);
+        });
+    </script>
+}
+

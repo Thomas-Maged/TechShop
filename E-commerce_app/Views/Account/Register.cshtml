@@ -1,0 +1,332 @@
+@model RegisterViewModel
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h1>Create Account</h1>
+            <p>Join TECHSHOP and start shopping</p>
+        </div>
+
+        <div class="success-message" id="successMessage">
+            Account created successfully! Redirecting...
+        </div>
+
+        <div class="error-message" id="errorMessage">
+            Something went wrong. Please try again.
+        </div>
+
+        <form id="registerForm" asp-controller="Account" asp-action="Register" method="post">
+            <!-- Account Information Section -->
+            <div class="form-section">
+                <div class="section-title">
+                    <i class="bi bi-person-circle"></i>
+                    Account Information
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="fullName">
+                        Email Address<span class="required">*</span>
+                    </label>
+                    <input type="text"
+                           class="form-input"
+                           id="fullName"
+                           asp-for="@Model.FullName"
+                           placeholder="Enter your full name"
+                           required
+                            />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="email">
+                        Email Address<span class="required">*</span>
+                    </label>
+                    <input 
+                        type="email" 
+                        class="form-input" 
+                        id="email" 
+                        asp-for= "@Model.Email" 
+                        placeholder="your.email@example.com" 
+                        required
+                        autocomplete="email"
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="password">
+                        Password<span class="required">*</span>
+                    </label>
+                    <div class="password-input-wrapper">
+                        <input 
+                            type="password" 
+                            class="form-input" 
+                            id="password" 
+                            name="Password" 
+                            placeholder="Create a strong password" 
+                            required
+                            autocomplete="new-password"
+                        />
+                        <button type="button" class="password-toggle" onclick="togglePassword('password', 'toggleIcon1')">
+                            <i class="bi bi-eye" id="toggleIcon1"></i>
+                        </button>
+                    </div>
+                    <div class="password-requirements">
+                        <ul id="passwordRequirements">
+                            <li id="req-length">At least 8 characters</li>
+                            <li id="req-uppercase">One uppercase letter</li>
+                            <li id="req-lowercase">One lowercase letter</li>
+                            <li id="req-number">One number</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="confirmPassword">
+                        Confirm Password<span class="required">*</span>
+                    </label>
+                    <div class="password-input-wrapper">
+                        <input 
+                            type="password" 
+                            class="form-input" 
+                            id="confirmPassword" 
+                            name="ConfirmPassword" 
+                            placeholder="Re-enter your password" 
+                            required
+                            autocomplete="new-password"
+                        />
+                        <button type="button" class="password-toggle" onclick="togglePassword('confirmPassword', 'toggleIcon2')">
+                            <i class="bi bi-eye" id="toggleIcon2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="phone">
+                    Phone Number<span class="required">*</span>
+                </label>
+                <input type="tel"
+                       inputmode="tel"
+                       class="form-input"
+                       id="phone"
+                       asp-for="@Model.Phone"
+                       placeholder="your phone number"
+                       required
+                       autocomplete="off" />
+            </div>
+
+            <!-- Address Information Section -->
+            <div class="form-section">
+                <div class="section-title">
+                    <i class="bi bi-geo-alt-fill"></i>
+                    Address Information
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="country">
+                            Country<span class="required">*</span>
+                        </label>
+                        <select class="form-select" id="country" name="Country" required>
+                            <option value="">Select Country</option>
+                            <option value="US">United States</option>
+                            <option value="CA">Canada</option>
+                            <option value="GB">United Kingdom</option>
+                            <option value="AU">Australia</option>
+                            <option value="DE">Germany</option>
+                            <option value="FR">France</option>
+                            <option value="IT">Italy</option>
+                            <option value="ES">Spain</option>
+                            <option value="JP">Japan</option>
+                            <option value="CN">China</option>
+                            <option value="IN">India</option>
+                            <option value="BR">Brazil</option>
+                            <option value="MX">Mexico</option>
+                            <option value="EG">Egypt</option>
+                            <option value="SA">Saudi Arabia</option>
+                            <option value="AE">United Arab Emirates</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="city">
+                            City<span class="required">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            class="form-input" 
+                            id="city" 
+                            name="City" 
+                            placeholder="Enter your city" 
+                            required
+                            autocomplete="address-level2"
+                        />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="street">
+                        Street Address<span class="required">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        class="form-input" 
+                        id="street" 
+                        name="Street" 
+                        placeholder="Enter your street address" 
+                        required
+                        autocomplete="street-address"
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="zip">
+                        ZIP / Postal Code<span class="required">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        class="form-input" 
+                        id="zip" 
+                        name="Zip" 
+                        placeholder="Enter ZIP code" 
+                        required
+                        autocomplete="postal-code"
+                    />
+                </div>
+            </div>
+
+            <!-- Terms and Conditions -->
+            <div class="terms-checkbox">
+                <input type="checkbox" id="terms" name="AcceptTerms" required />
+                <label for="terms">
+                    I agree to the <a href="#" onclick="showToast('Terms coming soon!', 'info'); return false;">Terms of Service</a> 
+                    and <a href="#" onclick="showToast('Privacy Policy coming soon!', 'info'); return false;">Privacy Policy</a>
+                </label>
+            </div>
+
+            <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
+
+            <button type="submit" class="btn-register">
+                Create Account
+            </button>
+        </form>
+
+        <div class="login-link">
+            <p>
+                Already have an account? 
+                <a href="@Url.Action("Login", "Account")">Sign in here</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function togglePassword(inputId, iconId) {
+            const passwordInput = document.getElementById(inputId);
+            const toggleIcon = document.getElementById(iconId);
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('bi-eye');
+                toggleIcon.classList.add('bi-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('bi-eye-slash');
+                toggleIcon.classList.add('bi-eye');
+            }
+        }
+
+        // Password validation
+        const passwordInput = document.getElementById('password');
+        passwordInput.addEventListener('input', function() {
+            const password = this.value;
+            
+            // Check length
+            const lengthReq = document.getElementById('req-length');
+            if (password.length >= 8) {
+                lengthReq.classList.add('valid');
+            } else {
+                lengthReq.classList.remove('valid');
+            }
+            
+            // Check uppercase
+            const uppercaseReq = document.getElementById('req-uppercase');
+            if (/[A-Z]/.test(password)) {
+                uppercaseReq.classList.add('valid');
+            } else {
+                uppercaseReq.classList.remove('valid');
+            }
+            
+            // Check lowercase
+            const lowercaseReq = document.getElementById('req-lowercase');
+            if (/[a-z]/.test(password)) {
+                lowercaseReq.classList.add('valid');
+            } else {
+                lowercaseReq.classList.remove('valid');
+            }
+            
+            // Check number
+            const numberReq = document.getElementById('req-number');
+            if (/[0-9]/.test(password)) {
+                numberReq.classList.add('valid');
+            } else {
+                numberReq.classList.remove('valid');
+            }
+        });
+
+        // Form submission handler
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            // Validate password match
+            if (password !== confirmPassword) {
+                const errorMsg = document.getElementById('errorMessage');
+                errorMsg.textContent = 'Passwords do not match!';
+                errorMsg.classList.add('show');
+                setTimeout(() => errorMsg.classList.remove('show'), 3000);
+                return;
+            }
+            
+            // Validate password requirements
+            if (password.length < 8 || !/[A-Z]/.test(password) || 
+                !/[a-z]/.test(password) || !/[0-9]/.test(password)) {
+                const errorMsg = document.getElementById('errorMessage');
+                errorMsg.textContent = 'Please meet all password requirements!';
+                errorMsg.classList.add('show');
+                setTimeout(() => errorMsg.classList.remove('show'), 3000);
+                return;
+            }
+            
+            // Get form data
+            const formData = {
+                email: document.getElementById('email').value,
+                password: password,
+                country: document.getElementById('country').value,
+                city: document.getElementById('city').value,
+                street: document.getElementById('street').value,
+                zip: document.getElementById('zip').value,
+                acceptTerms: document.getElementById('terms').checked
+            };
+            
+            // Here you would handle the registration logic
+            // For now, just log the form data
+            console.log('Registration attempt:', formData);
+            
+            // Example: You can access the form data here and send it to your backend
+            // const formDataObj = new FormData(this);
+            // Your backend integration code goes here
+            
+            // Example success display (remove this when implementing real logic)
+            // const successMsg = document.getElementById('successMessage');
+            // successMsg.classList.add('show');
+            // setTimeout(() => {
+            //     window.location.href = '@Url.Action("Login", "Account")';
+            // }, 2000);
+        });
+    </script>
+}

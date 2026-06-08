@@ -1,0 +1,294 @@
+﻿@model OrderViewModel
+@{
+    ViewData["Title"] = "Checkout";
+    decimal total = 0;
+    decimal totalSavings = 0;
+}
+<form id="checkoutForm" asp-action="Checkout" method="post">
+
+    <!-- Back to Cart Link -->
+    <a asp-controller="Cart" asp-action="Index" class="back-to-cart animate-in">
+        <i class="bi bi-arrow-left"></i>
+        <span>Back to Cart</span>
+    </a>
+
+    <!-- Page Header -->
+    <div class="page-header mb-4 animate-in">
+        <h1 class="display-4 mb-3">
+            <i class="bi bi-credit-card me-3"></i>Checkout
+        </h1>
+        <p class="lead" style="color: var(--text-secondary);">
+            Complete your order and get your tech delivered
+        </p>
+    </div>
+
+    <!-- Checkout Steps -->
+    <div class="checkout-steps animate-in">
+        <div class="checkout-step completed">
+            <div class="step-number">
+                <i class="bi bi-check2"></i>
+            </div>
+            <span class="step-text">Cart</span>
+        </div>
+        <div class="checkout-step active">
+            <div class="step-number">2</div>
+            <span class="step-text">Checkout</span>
+        </div>
+        <div class="checkout-step">
+            <div class="step-number">3</div>
+            <span class="step-text">Confirmation</span>
+        </div>
+    </div>
+
+    <div class="checkout-container">
+        <div class="row g-4">
+            <!-- Left Column - Checkout Form -->
+            <div class="col-lg-7">
+                <!-- Shipping Information -->
+                <div class="checkout-section animate-in">
+                    <h3 class="checkout-section-title">
+                        <i class="bi bi-truck"></i>
+                        Shipping Information
+                    </h3>
+
+                    <!-- Full Name -->
+                    <div class="form-group">
+                        <label for="fullName" class="form-label required">Full Name</label>
+                        <input type="text" class="form-control-checkout" id="fullName"
+                               placeholder="John Doe" required asp-for="FullName">
+                        <span class="form-error">Please enter your full name</span>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="form-group">
+                        <label for="email" class="form-label required">Email Address</label>
+                        <input type="email" class="form-control-checkout" id="email"
+                               placeholder="john.doe@example.com" required asp-for="Email">
+                        <span class="form-error">Please enter a valid email address</span>
+                        <span class="form-text">Order confirmation will be sent to this email</span>
+                    </div>
+
+                    <!-- Phone Number -->
+                    <div class="form-group">
+                        <label for="phone" class="form-label required">Phone Number</label>
+                        <input type="tel" class="form-control-checkout" id="phone"
+                               placeholder="+1 (555) 123-4567" required asp-for="Phone">
+                        <span class="form-error">Please enter a valid phone number</span>
+                        <span class="form-text">For delivery updates and support</span>
+                    </div>
+
+                    <!-- Address -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="country" class="form-label required">Country</label>
+                                <input type="text" class="form-control-checkout" id="country"
+                                       placeholder="e.g. United States" required asp-for="Country">
+                                <span class="form-error">Please enter your country</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="city" class="form-label required">City</label>
+                                <input type="text" class="form-control-checkout" id="city"
+                                       placeholder="e.g. New York" required asp-for="City">
+                                <span class="form-error">Please enter your city</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <label for="street" class="form-label required">Street Address</label>
+                                <input type="text" class="form-control-checkout" id="street"
+                                       placeholder="123 Main Street, Apt 4B" required asp-for="Street">
+                                <span class="form-error">Please enter your street address</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="zipCode" class="form-label required">ZIP Code</label>
+                                <input type="text" class="form-control-checkout" id="zipCode"
+                                       placeholder="10001" required asp-for="ZIP">
+                                <span class="form-error">Required</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Notes -->
+                    <div class="form-group">
+                        <label for="notes" class="form-label">Order Notes (Optional)</label>
+                        <textarea class="form-control-checkout" id="notes"
+                                  placeholder="Any special instructions for delivery?"></textarea>
+                    </div>
+                </div>
+
+                <!-- Payment Info Notice -->
+                <div class="checkout-section animate-in" style="animation-delay: 0.1s;">
+                    <h3 class="checkout-section-title">
+                        <i class="bi bi-credit-card-2-front"></i>
+                        Payment Method
+                    </h3>
+                    <div style="padding: var(--spacing-lg); background: var(--bg-secondary); border-radius: var(--radius-md); text-align: center;">
+                        <i class="bi bi-info-circle" style="font-size: 2rem; color: var(--accent-primary); margin-bottom: var(--spacing-md);"></i>
+                        <p style="color: var(--text-secondary); margin: 0;">
+                            Payment will be collected upon delivery (Cash on Delivery)
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Order Summary -->
+            <div class="col-lg-5">
+                <div class="order-summary-card animate-in" style="animation-delay: 0.2s;">
+                    <h3 class="order-summary-title">
+                        <i class="bi bi-receipt"></i>
+                        Order Summary
+                    </h3>
+
+                    <!-- Order Items List -->
+                    <div class="order-items-list" style="margin-bottom: var(--spacing-lg);">
+                        <!-- Order Item 1 -->
+                        @{
+                            @foreach (var item in Model.Items)
+                            {
+                                
+                                <div class="order-item">
+                    
+                                    <div class="order-item-image">
+                                        <img src="@item.Image"
+                                             alt="@item.Name">
+                                    </div>
+                                    <div class="order-item-details">
+                                        <div class="order-item-name">@item.Name</div>
+                                        <div class="order-item-quantity">Quantity: @item.Quantity</div>
+                                    </div>
+                                    <div class="order-item-price">$@item.UnitPrice</div>
+                                </div>
+                            }
+                        }
+
+                        <!-- Order Totals -->
+                        <div class="order-summary-totals">
+                            <div class="summary-row">
+                                <span class="summary-label">Discount</span>
+                                <span class="summary-value discount" id="order-discount">-$@Model.TotalSavings</span>
+                            </div>
+                            <div class="summary-row">
+                                <span class="summary-label">Shipping</span>
+                                <span class="summary-value" id="order-shipping">FREE</span>
+                            </div>
+                            <div class="summary-total">
+                                <span class="summary-total-label">Total</span>
+                                <span class="summary-total-value" id="order-total">$@Model.TotalPrice</span>
+                            </div>
+                        </div>
+                        <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
+
+                        <!-- Place Order Button -->
+                        <button type="submit" class="btn-primary btn btn-place-order" id="placeOrderBtn">
+                            <i class="bi bi-check-circle"></i>
+                            <span>Place Order</span>
+                        </button>
+
+                        <!-- Security Badge -->
+                        <div class="security-badge">
+                            <i class="bi bi-shield-check"></i>
+                            <span>Your information is secure and encrypted</span>
+                        </div>
+
+                        <!-- Additional Info -->
+                        <div class="product-features mt-4">
+                            <div class="feature-item">
+                                <div class="feature-icon">
+                                    <i class="bi bi-truck"></i>
+                                </div>
+                                <div class="feature-text">
+                                    <div class="feature-title">Free Shipping</div>
+                                    <div class="feature-description">Delivery in 3-5 days</div>
+                                </div>
+                            </div>
+                            <div class="feature-item">
+                                <div class="feature-icon">
+                                    <i class="bi bi-arrow-repeat"></i>
+                                </div>
+                                <div class="feature-text">
+                                    <div class="feature-title">Easy Returns</div>
+                                    <div class="feature-description">30-day return policy</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <input type="hidden" asp-for="TotalPrice" value="@Model.TotalPrice" />
+        <input type="hidden" asp-for="TotalSavings" value="@Model.TotalSavings" />
+
+    </form>
+    @section Scripts {
+        <script>
+            // ============================================
+            // CHECKOUT PAGE SPECIFIC JAVASCRIPT
+            // ============================================
+
+            // Initialize on page load
+            document.addEventListener('DOMContentLoaded', function() {
+                calculateOrderTotals();
+            });
+
+            // Place Order Button
+            document.getElementById('placeOrderBtn').addEventListener('click', function() {
+                // Validate form
+                if (!validateCheckoutForm()) {
+                    showToast('Please fill in all required fields correctly', 'error');
+                    return;
+                }
+
+            // Get order items data
+            function getOrderItems() {
+                const items = [];
+                document.querySelectorAll('.order-item').forEach(item => {
+                    items.push({
+                        name: item.querySelector('.order-item-name').textContent,
+                        quantity: parseInt(item.dataset.quantity),
+                        price: parseFloat(item.dataset.price),
+                        oldPrice: parseFloat(item.dataset.oldPrice) || 0
+                    });
+                });
+                return items;
+            }
+
+            // Real-time validation on input
+            document.querySelectorAll('.form-control-checkout').forEach(field => {
+                field.addEventListener('input', function() {
+                    if (this.classList.contains('is-invalid')) {
+                        this.classList.remove('is-invalid');
+                    }
+                });
+
+                field.addEventListener('blur', function() {
+                    if (this.hasAttribute('required') && !this.value.trim()) {
+                        this.classList.add('is-invalid');
+                    }
+                });
+            });
+
+            // Email validation on blur
+            document.getElementById('email').addEventListener('blur', function() {
+                const emailPattern = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+                if (this.value.trim() && !emailPattern.test(this.value)) {
+                    this.classList.add('is-invalid');
+                }
+            });
+
+            // Phone validation on blur
+            document.getElementById('phone').addEventListener('blur', function() {
+                const phonePattern = /^[\d\s\-\+\(\)]+$/;
+                if (this.value.trim() && !phonePattern.test(this.value)) {
+                    this.classList.add('is-invalid');
+                }
+            });
+        </script>
+    }

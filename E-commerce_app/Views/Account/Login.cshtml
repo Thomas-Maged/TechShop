@@ -1,0 +1,104 @@
+@{
+    ViewData["Title"] = "Login";
+}
+
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h1>Welcome Back</h1>
+            <p>Sign in to your TECHSHOP account</p>
+        </div>
+
+        <div class="error-message" id="errorMessage">
+            Invalid email or password. Please try again.
+        </div>
+
+        <form id="loginForm" asp-controller="Account" asp-action="Login" method="post">
+            <div class="form-group">
+                <label class="form-label" for="email">Email Address</label>
+                <input 
+                    type="email" 
+                    class="form-input" 
+                    id="email" 
+                    name="Email" 
+                    placeholder="your.email@example.com" 
+                    required
+                    autocomplete="email"
+                />
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="password">Password</label>
+                <div class="password-input-wrapper">
+                    <input 
+                        type="password" 
+                        class="form-input" 
+                        id="password" 
+                        name="Password" 
+                        placeholder="Enter your password" 
+                        required
+                        autocomplete="current-password"
+                    />
+                    <button type="button" class="password-toggle" onclick="togglePassword()">
+                        <i class="bi bi-eye" id="toggleIcon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="forgot-password">
+                <a href="#" onclick="showToast('Password reset coming soon!', 'info'); return false;">
+                    Forgot password?
+                </a>
+            </div>
+
+            <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
+            <button type="submit" class="btn-login">
+                Sign In
+            </button>
+        </form>
+
+        <div class="register-link">
+            <p>Don't have an account?</p>
+            <a href="@Url.Action("Register", "Account")" class="btn-register">
+                Create Account
+            </a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.getElementById('toggleIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('bi-eye');
+                toggleIcon.classList.add('bi-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('bi-eye-slash');
+                toggleIcon.classList.add('bi-eye');
+            }
+        }
+
+        // Form submission handler (you'll handle the actual API call)
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            // Here you would handle the login logic
+            // For now, just show that form data is ready
+            console.log('Login attempt:', { email, password });
+            
+            // Example: You can access the form data here and send it to your backend
+            // const formData = new FormData(this);
+            // Your backend integration code goes here
+            
+            // Example error display (remove this when implementing real logic)
+            // document.getElementById('errorMessage').classList.add('show');
+        });
+    </script>
+}

@@ -1,0 +1,345 @@
+﻿@model ProductsViewModel
+@{
+    ViewData["Title"] = "Products";
+}
+
+<!-- Page Header -->
+<div class="page-header mb-4 animate-in">
+    <h1 class="display-4 mb-3">
+        <i class="bi bi-grid-3x3-gap me-3"></i>Discover Technology
+    </h1>
+    <p class="lead" style="color: var(--text-secondary);">
+        Explore our cutting-edge collection of premium tech products
+    </p>
+</div>
+
+<div class="row">
+    <!-- Sidebar Filters -->
+    <div class="col-lg-3 col-md-4 mb-4">
+
+        <div class="card filter-sidebar animate-in" style="animation-delay: 0.1s;">
+            <div class="card-body">
+                <form>
+
+                    <h5 class="filter-title mb-4">
+                        <i class="bi bi-funnel me-2"></i>Filters
+                    </h5>
+
+                    <!-- Category Filter -->
+                    <div class="filter-section mb-4">
+                        <h6 class="filter-subtitle mb-3">Categories</h6>
+                        <div class="category-list">
+                            <div class="form-check category-item">
+                                <input class="form-check-input" id="catAll" type="radio" name="catID" value="all" checked>
+                                <label class="form-check-label">
+                                    All Products
+                                    @* <span class="category-count">124</span> *@
+                                </label>
+                            </div>
+                            @foreach (var category in Model.Categories)
+                            {
+                                if (category.Name == "Uncategorized")
+                                {
+                                    if (User.IsInRole("admin"))
+                                    {
+                                        <div class="form-check category-item">
+                                            @if (category.CategoryID == Model.CategoryID)
+                                            {
+                                                <input class="form-check-input" type="radio" name="catID" value="@category.CategoryID" checked>
+                                            }
+                                            else
+                                            {
+                                                <input class="form-check-input" type="radio" name="catID" value="@category.CategoryID">
+                                            }
+                                    
+                                            <label class="form-check-label">
+                                                @category.Name
+                                                @* <span class="category-count">32</span> *@
+                                            </label>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <div class="form-check category-item">
+                                        @if (category.CategoryID == Model.CategoryID)
+                                        {
+                                            <input class="form-check-input" type="radio" name="catID" value="@category.CategoryID" checked>
+                                        }
+                                        else
+                                        {
+                                            <input class="form-check-input" type="radio" name="catID" value="@category.CategoryID">
+                                        }
+                                    
+                                        <label class="form-check-label">
+                                            @category.Name
+                                            @* <span class="category-count">32</span> *@
+                                        </label>
+                                    </div>
+                                }
+                                    
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Price Range Filter -->
+                    <div class="filter-section mb-4">
+                        <h6 class="filter-subtitle mb-3">Price Range</h6>
+                        <div class="price-range-inputs">
+                            <div class="input-group mb-2">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control search-input" placeholder="Min" id="priceMin" name="minPrice" value="@Model.MinPrice">
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control search-input" placeholder="Max" id="priceMax" name="maxPrice" value="@Model.MaxPrice">
+                            </div>
+                        </div>
+                    </div>
+
+                    <input type="hidden" name="pg" value="1" />
+                    <!-- Filter Actions -->
+                    <div class="d-grid gap-2">
+                        <button type="submit" asp-route-pg="1" class="btn-primary btn" id="applyFilters">
+                            <i class="bi bi-check2-circle me-2"></i>Apply Filters
+                        </button>
+                        <button type="submit" class="btn-outline btn" id="clearFilters">
+                            <i class="bi bi-arrow-counterclockwise me-2"></i>Clear All
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+    <!-- Products Grid -->
+    <div class="col-lg-9 col-md-8">
+        <!-- Results Info -->
+        <div class="results-bar mb-4 animate-in" style="animation-delay: 0.2s;">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <div class="results-info">
+                    <span style="color: var(--text-secondary);">Showing</span>
+                    <span class="text-gradient fw-bold">@Model.FromProduct-@Model.ToProduct</span>
+                    <span style="color: var(--text-secondary);">of</span>
+                    <span class="text-gradient fw-bold">@Model.TotalNumberOfProducts</span>
+                    <span style="color: var(--text-secondary);">products</span>
+                </div>
+                <div class="view-toggle">
+                    @if (User.IsInRole("admin"))
+                    {
+                        <a asp-action="Add" class="btn-outline btn">
+                            Add
+                        </a>
+                    }
+                    <button class="view-btn active" data-view="grid" title="Grid View">
+                        <i class="bi bi-grid-3x3-gap"></i>
+                    </button>
+                    <button class="view-btn" data-view="list" title="List View">
+                        <i class="bi bi-list-ul"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products Grid -->
+        <div class="row g-4 products-container" id="productsGrid">
+            <!--Products cards-->
+            @foreach (var product in Model.Products)
+            {
+                <div class="col-lg-4 col-md-6 product-item animate-in" style="animation-delay: 0.3s;">
+                    <div class="card product-card h-100">
+                        <div class="product-image-container">
+                            <img src="@product.Image"
+                                 class="product-image" alt="UltraBook Pro 15">
+                            <div class="badge-stack">
+                                @if (product.StockQuantity <= 0)
+                                {
+                                    <div class="product-badge out-of-stock">Out of Stock</div>
+                                }
+                                @if (product.DiscountPercentage > 0)
+                                {
+                                    <div class="product-badge product-savings">@((int)product.DiscountPercentage)% off</div>
+                                }
+                            </div>
+
+                            @if (!User.IsInRole("admin"))
+                            {
+                                <div class="product-overlay">
+                                    <a asp-controller="Product" asp-action="Details" asp-route-productID="@product.ProductID" class="btn-primary btn btn-sm quick-view-btn">
+                                        <i class="bi bi-eye me-2"></i>Quick View
+                                    </a>
+                                </div>
+                            }
+                            
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <div class="product-category">@product.Category.Name</div>
+                            <h5 class="product-title">@product.Name</h5>
+                            <p class="product-description">
+                                @product.Description
+                            </p>
+                            <div class="mt-auto">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="product-price">$@(@product.Price - (@product.Price*(@product.DiscountPercentage/100)))</div>
+                                    <form asp-controller="Cart" asp-action="Add" method="post">
+                                        <input type="hidden" name="productID" value="@product.ProductID" />
+                                        
+                                        @if (User.IsInRole("admin"))
+                                        {
+                                            <a asp-action="Edit" asp-route-id="@product.ProductID" class="btn-primary btn btn-sm add-to-cart-btn">
+                                                <i class="bi bi-pencil-fill"></i>
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            @if (product.StockQuantity <= 0)
+                                            {
+                                                <button disabled type="submit" class="btn-primary btn btn-sm add-to-cart-btn">
+                                                    <i class="bi bi-cart-plus"></i>
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button type="submit" class="btn-primary btn btn-sm add-to-cart-btn">
+                                                    <i class="bi bi-cart-plus"></i>
+                                                </button>
+                                            }
+                                        }
+                                            
+                                    </form>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+        </div>
+
+        <!-- Pagination -->
+        <nav aria-label="Products pagination" class="mt-5 animate-in" style="animation-delay: 1.5s;">
+            <ul class="pagination justify-content-center">
+                @{
+                    if (Model.Page > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" tabindex="-1" aria-disabled="true" asp-route-pg="@(Model.Page - 1)" asp-route-catID="@Model.CategoryID" asp-route-minPrice="@Model.MinPrice" asp-route-maxPrice="@Model.MaxPrice">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+                    }
+                }
+                
+                @{
+                    decimal iterations = Math.Ceiling((decimal)(Model.TotalNumberOfProducts / 12.0));
+                    for (int i = 1; i <= iterations; i++)
+                    {
+                        @if (i == Model.Page)
+                        {
+                            <li class="page-item active"><a class="page-link" asp-route-pg="@i" asp-route-catID="@Model.CategoryID" asp-route-minPrice="@Model.MinPrice" asp-route-maxPrice="@Model.MaxPrice">@i</a></li>
+                        }
+                        else
+                        {
+                            <li class="page-item"><a class="page-link" asp-route-pg="@i" asp-route-catID="@Model.CategoryID" asp-route-minPrice="@Model.MinPrice" asp-route-maxPrice="@Model.MaxPrice">@i</a></li>
+                        }
+                    }
+                    if (Model.Page < iterations)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" asp-route-pg="@(Model.Page + 1)" asp-route-catID="@Model.CategoryID" asp-route-minPrice="@Model.MinPrice" asp-route-maxPrice="@Model.MaxPrice">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                    }
+                }
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // ============================================
+        // PRODUCTS PAGE SPECIFIC JAVASCRIPT
+        // ============================================
+
+        // Filter functionality
+        document.getElementById('applyFilters').addEventListener('click', function() {
+            const category = document.querySelector('input[name="category"]:checked').value;
+            const minPrice = document.getElementById('priceMin').value;
+            const maxPrice = document.getElementById('priceMax').value;
+
+            console.log('Applying filters:', { category, minPrice, maxPrice });
+            showToast('Filters applied successfully!');
+        });
+
+        // Clear filters
+        document.getElementById('clearFilters').addEventListener('click', function() {
+            document.getElementById('catAll').checked = true;
+            document.getElementById('priceMin').value = 0;
+            document.getElementById('priceMax').value = 0;
+
+            showToast('Filters cleared');
+        });
+
+        // View toggle (Grid/List)
+        document.querySelectorAll('.view-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+
+                const view = this.dataset.view;
+                const container = document.getElementById('productsGrid');
+
+                if (view === 'list') {
+                    container.classList.add('list-view');
+                } else {
+                    container.classList.remove('list-view');
+                }
+            });
+        });
+
+        // Add to cart functionality
+        document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                
+                // Show notification
+                showToast('Product added to cart!');
+
+            });
+        });
+
+        // Category filter change (optional auto-apply)
+        document.querySelectorAll('input[name="category"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                console.log('Category changed to:', this.value);
+                // Uncomment to auto-apply on category change:
+                // document.getElementById('applyFilters').click();
+            });
+        });
+
+        // Price range validation
+        document.getElementById('priceMin').addEventListener('change', function() {
+            const min = parseInt(this.value) || 0;
+            const max = parseInt(document.getElementById('priceMax').value) || 5000;
+
+            if (min > max) {
+                this.value = max;
+                showToast('Minimum price cannot exceed maximum price', 'error');
+            }
+        });
+
+        document.getElementById('priceMax').addEventListener('change', function() {
+            const min = parseInt(document.getElementById('priceMin').value) || 0;
+            const max = parseInt(this.value) || 5000;
+
+            if (max < min) {
+                this.value = min;
+                showToast('Maximum price cannot be less than minimum price', 'error');
+            }
+        });
+    </script>
+}

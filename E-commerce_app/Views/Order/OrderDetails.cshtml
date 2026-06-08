@@ -1,0 +1,219 @@
+@model OrderDetailsViewModel
+@{
+    ViewData["Title"] = "Order Details";
+}
+
+
+<div class="order-details-container">
+    <!-- Order Header -->
+    <div class="order-header-top d-flex justify-content-between align-items-center">
+        <div class="order-title-section">
+            <h1>Order Details</h1>
+            <p class="order-number">Order Number: <span>#@Model.OrderNumber</span></p>
+        </div>
+
+        @if (User.IsInRole("admin"))
+        {
+            <div class="admin-controls d-flex gap-2">
+                <a asp-action="UpdateStatus" asp-route-id="@Model.OrderID" asp-route-status="@E_commerce_entities.Enums.StatusEnum.InQueue" class="btn-status in-queue @(Model.Status == E_commerce_entities.Enums.StatusEnum.InQueue ? "active" : "")"
+                       onclick="updateStatus('@Model.OrderNumber', 'InQueue')">
+                    <i class="bi bi-hourglass-split"></i> Set In Queue
+                </a>
+        
+                <a asp-action="UpdateStatus" asp-route-id="@Model.OrderID" asp-route-status="@E_commerce_entities.Enums.StatusEnum.Completed" class="btn-status completed @(Model.Status == E_commerce_entities.Enums.StatusEnum.Completed ? "active" : "")"
+                       onclick="updateStatus('@Model.OrderNumber', 'Completed')">
+                    <i class="bi bi-check2-circle"></i> Set Completed
+                </a>
+        
+                <a asp-action="UpdateStatus" asp-route-id="@Model.OrderID" asp-route-status="@E_commerce_entities.Enums.StatusEnum.Cancelled" class="btn-status cancelled @(Model.Status == E_commerce_entities.Enums.StatusEnum.Cancelled ? "active" : "")"
+                       onclick="updateStatus('@Model.OrderNumber', 'Cancelled')">
+                    <i class="bi bi-x-circle"></i> Cancel Order
+                </a>
+            </div>
+        }
+        
+    </div>
+
+        <div class="order-meta">
+            <div class="meta-item">
+                <span class="meta-label">Order Date</span>
+                <span class="meta-value">@Model.OrderDate.ToString("dddd dd MMMM yyyy")</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Status</span>
+                <span class="meta-value">
+                    @{
+                        if(Model.Status == E_commerce_entities.Enums.StatusEnum.InQueue)
+                        {
+                            <span class="status-badge status-queue">
+                                <i class="bi bi-hourglass-split"></i> In Queue
+                            </span>
+                        }
+                        else if (Model.Status == E_commerce_entities.Enums.StatusEnum.Completed)
+                        {
+                            <span class="status-badge status-completed">
+                                <i class="bi bi-check2-circle"></i> Completed
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="status-badge status-cancelled">
+                                <i class="bi bi-x-circle"></i> Cancelled
+                            </span>
+                        }
+                    }
+                    
+                </span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Payment Method</span>
+                <span class="meta-value">Cash on Delivery</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Total Amount</span>
+                <span class="meta-value">$@Model.TotalAmount</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="order-content">
+        <!-- Left Column: Shipping & Items -->
+        <div>
+            <!-- Shipping Information -->
+            <div class="order-info-section">
+                <div class="section-header">
+                    <i class="bi bi-truck"></i>
+                    <h2>Shipping Information</h2>
+                </div>
+
+                <div class="info-group">
+                    <div class="info-label">Customer Name</div>
+                    <div class="info-value">@Model.Fullname</div>
+                </div>
+
+                <div class="info-group">
+                    <div class="info-label">Email Address</div>
+                    <div class="info-value">@Model.Email</div>
+                </div>
+
+                <div class="info-group">
+                    <div class="info-label">Phone Number</div>
+                    <div class="info-value">@Model.Phone</div>
+                </div>
+
+                <div class="info-group">
+                    <div class="info-label">Shipping Address</div>
+                    <div class="info-value">@Model.Address</div>
+                </div>
+
+                <div class="info-group">
+                    <div class="info-label">Order Notes</div>
+                    <div class="info-value">Please handle with care. Fragile items.</div>
+                </div>
+            </div>
+
+            <!-- Order Items -->
+            <div class="order-info-section" style="margin-top: 32px;">
+                <div class="section-header">
+                    <i class="bi bi-box-seam"></i>
+                    <h2>Order Items</h2>
+                </div>
+
+                <div class="order-items">
+                    @foreach (var item in Model.Items)
+                    {
+                        <div class="order-item">
+                            <img src="@item.Image" alt="@item.Name" class="item-image">
+                            <div class="item-details">
+                                <div class="item-name">
+                                    <a asp-controller="Product" asp-action="Details" asp-route-productID="@item.ProductID">@item.Name</a>
+                                </div>
+                                <div class="item-meta">
+                                    <span>Quantity: <span class="item-quantity">@item.Quantity</span></span>
+                                    <span>•</span>
+                                    <span class="item-price">$@item.UnitPrice</span>
+                                </div>
+                            </div>
+                            <div class="item-subtotal">
+                                $@(@item.UnitPrice * @item.Quantity)
+                            </div>
+                        </div>
+                    }
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Order Summary -->
+        <div>
+            <div class="order-summary-box">
+                <div class="section-header">
+                    <i class="bi bi-receipt"></i>
+                    <h2>Order Summary</h2>
+                </div>
+
+                <div class="summary-row summary-discount">
+                    <span class="summary-label">Discount</span>
+                    <span class="summary-value">-$@Model.TotalDiscount</span>
+                </div>
+
+                <div class="summary-row">
+                    <span class="summary-label">Shipping</span>
+                    <span class="summary-value">FREE</span>
+                </div>
+
+                <div class="summary-row summary-total">
+                    <span class="summary-label">Total</span>
+                    <span class="summary-value">$@Model.TotalAmount</span>
+                </div>
+
+                <!-- Payment Information -->
+                <div class="payment-info-box">
+                    <div class="payment-method">
+                        <i class="bi bi-cash-coin"></i>
+                        <span class="payment-method-name">Cash on Delivery</span>
+                    </div>
+                    <p class="payment-note">
+                        <i class="bi bi-info-circle"></i>
+                        Payment will be collected upon delivery
+                    </p>
+                </div>
+
+                <!-- Trust Badges -->
+                <div class="trust-badges">
+                    <div class="trust-badge">
+                        <i class="bi bi-truck"></i>
+                        <div class="trust-badge-text">
+                            <div class="trust-badge-title">Free Shipping</div>
+                            <div class="trust-badge-desc">3-5 business days</div>
+                        </div>
+                    </div>
+                    <div class="trust-badge">
+                        <i class="bi bi-arrow-repeat"></i>
+                        <div class="trust-badge-text">
+                            <div class="trust-badge-title">Easy Returns</div>
+                            <div class="trust-badge-desc">30-day return policy</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+                function updateStatus(orderId, newStatus) {
+            // Select the button that was clicked
+            const btn = event.currentTarget;
+            const originalContent = btn.innerHTML;
+    
+            // UI Feedback: Show loading state
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Updating...`;
+
+            console.log(`Sending update for Order ${orderId} to status: ${newStatus}`);
+        }
+    </script>
+}
+                       

@@ -1,0 +1,125 @@
+﻿@model ProductViewModel
+@{
+    ViewData["Title"] = "Add";
+}
+
+<div class="container main-content animate-in">
+    <div class="page-header mb-4">
+        <h1 class="text-gradient">Add New Product</h1>
+        <p class="text-secondary">Expand the TechShop inventory with high-end hardware</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <form id="addProductForm" enctype="multipart/form-data" asp-action="Add" class="card p-4 shadow-lg">
+                
+                <div class="form-group">
+                    <label class="form-label required">Product Name</label>
+                    <input type="text" asp-for="Name" class="form-control-checkout" placeholder="e.g. Mechanical Gaming Keyboard" required>
+                    <span class="form-error" asp-validation-for="Name">Please enter a valid product name.</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label required">Description</label>
+                    <textarea asp-for="Description" class="form-control-checkout" rows="4" placeholder="Enter detailed technical specifications..." required></textarea>
+                    <span class="form-error">Description is required.</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label required">Category</label>
+                    <select asp-for="CategoryID" class="form-control-checkout" required>
+                        <option value="" disabled selected>Select a category</option>
+                        @foreach (var category in ViewBag.Categories)
+                        {
+                            <option value="@category.CategoryID">@category.Name</option>
+                        }
+                    </select>
+                    <span class="form-error">Please select a category.</span>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 form-group">
+                        <label class="form-label required">Base Price ($)</label>
+                        <input type="number" asp-for="Price" step="0.01" class="form-control-checkout" placeholder="0.00" required>
+                    </div>
+                    <div class="col-md-4 form-group">
+                        <label class="form-label">Discount (%)</label>
+                        <input type="number" asp-for="DiscountPercentage" class="form-control-checkout" placeholder="0" min="0" max="100">
+                    </div>
+                    <div class="col-md-4 form-group">
+                        <label class="form-label required">Stock Quantity</label>
+                        <input type="number" asp-for="StockQuantity" class="form-control-checkout" placeholder="1" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label required">Product Image</label>
+                    <input type="file" asp-for="Image" id="imageUpload" class="form-control-checkout" accept="image/*" required>
+                    <div id="imagePreviewContainer" class="mt-3 d-none">
+                        <div class="order-item-image" style="width: 150px; height: 150px;">
+                            <img id="imagePreview" src="#" alt="Preview">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" asp-for="IsActive" id="isActive" checked>
+                        <label class="form-check-label text-white" for="isActive">Product is Active</label>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" id="submitBtn" class="btn-primary py-3">
+                        <i class="bi bi-plus-circle me-2"></i>Create Product
+                    </button>
+                    <a asp-action="Index" asp-route-pg="1" class="back-to-cart justify-content-center">
+                        <i class="bi bi-arrow-left"></i> Cancel and Return
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script>
+            $(document).ready(function() {
+            // 1. Image Preview Logic
+            $('#imageUpload').on('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('#imagePreview').attr('src', e.target.result);
+                        $('#imagePreviewContainer').removeClass('d-none');
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // 2. Form Submission & Validation UI
+            $('#addProductForm').on('submit', function(e) {
+                let isValid = true;
+        
+                // Basic validation check to trigger your CSS .is-invalid + .form-error
+                $(this).find('input[required], textarea[required], select[required]').each(function() {
+                    if (!$(this).val()) {
+                        $(this).addClass('is-invalid');
+                        isValid = false;
+                    } else {
+                        $(this).removeClass('is-invalid');
+                    }
+                });
+
+                if (isValid) {
+                    const btn = $('#submitBtn');
+                    btn.addClass('loading'); // Uses your existing spin animation
+                    btn.prop('disabled', true);
+                } else {
+                    e.preventDefault(); // Stop submission if invalid
+                }
+            });
+        });
+    </script>
+}
+

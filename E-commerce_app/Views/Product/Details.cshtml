@@ -1,0 +1,222 @@
+﻿@model Product
+@{
+    ViewData["Title"] = "Product Details";
+}
+
+<!-- Breadcrumb -->
+<div class="product-breadcrumb animate-in">
+    <a asp-controller="Home" asp-action="Index">Home</a>
+    <i class="bi bi-chevron-right"></i>
+    <a asp-controller="Product" asp-action="Index" asp-route-pg="1">Products</a>
+    <i class="bi bi-chevron-right"></i>
+    <span>@Model.Name</span>
+</div>
+
+<!-- Product Details Container -->
+<div class="product-details-container">
+    <div class="row g-4">
+        <!-- Left Column - Product Images -->
+        <div class="col-lg-6">
+            <div class="animate-in">
+                <!-- Main Product Image -->
+                <div class="product-image-main">
+                    <img src="@Model.Image"
+                         alt="UltraBook Pro 15" id="mainProductImage">
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Product Info -->
+        <div class="col-lg-6">
+            <div class="product-info-section animate-in" style="animation-delay: 0.1s;">
+                <!-- Category Badge -->
+                <span class="product-details-category">@Model.Category.Name</span>
+
+                <!-- Product Title -->
+                <h1 class="product-details-title">@Model.Name</h1>
+
+                <!-- Price -->
+                @{
+                    if (Model.DiscountPercentage > 0)
+                    {
+                        <div>
+                            <span class="product-details-price">@(Model.Price-(Model.Price*(Model.DiscountPercentage/100)))</span>
+                            <span class="product-details-price-old">@Model.Price</span>
+                            <span class="product-savings">Save @((Model.Price) - (Model.Price - (Model.Price * (Model.DiscountPercentage / 100))))</span>
+                        </div>
+                    }
+                    else
+                    {
+                        <div>
+                            <span class="product-details-price">@Model.Price</span>
+                        </div>
+                    }
+                }
+                
+
+                <!-- Stock Status -->
+                @{
+                    if(Model.StockQuantity > 0)
+                    {
+                        <div class="stock-status in-stock" id="stockStatus">
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span>In Stock</span>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="stock-status out-of-stock" id="stockStatus">
+                            <i class="bi bi-x-circle-fill"></i>
+                            <span>Out Of Stock</span>
+                        </div>
+                    }
+                }
+                
+                <!-- Description -->
+                <div class="product-description-section">
+                    <h5>Description</h5>
+                    <p class="product-description-text">
+                        @Model.Description
+                    </p>
+                </div>
+
+                <form asp-controller="Cart" asp-action="Add" method="post">
+                <input type="hidden" name="productID" value="@Model.ProductID" />
+                <!-- Quantity Selector -->
+                <div class="quantity-selector">
+                    <span class="quantity-label">Quantity:</span>
+                    <div class="quantity-controls">
+                        <button type="button" class="quantity-btn quantity-decrease"
+                                onclick="updateQuantity(-1, @Model.StockQuantity)" disabled>
+                            <i class="bi bi-dash"></i>
+                        </button>
+                        <input name="quantity" type="number" class="quantity-input" id="quantityInput"
+                               value="1" min="1" readonly>
+                        <button type="button" class="quantity-btn quantity-increase"
+                                onclick="updateQuantity(1, @Model.StockQuantity)">
+                            <i class="bi bi-plus"></i>
+                        </button>
+                    </div>
+                    <div class="stock-status out-of-stock" id="stockStatusNumberOfProducts">
+                        <i class="bi bi-x-circle-fill"></i>
+                        <span>Only @Model.StockQuantity items available in stock</span>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                @if(Model.StockQuantity > 0)
+                {
+                    <div class="product-actions">
+                        <button type="submit" class="btn-primary btn btn-x-to-cart w-100" id="addToCartBtn">
+                            <i class="bi bi-cart-plus"></i>
+                            <span>Add to Cart</span>
+                        </button>
+                    </div>
+                }
+                else
+                {
+                    <div class="product-actions">
+                        <button disabled class="btn-primary btn btn-x-to-cart w-100" id="addToCartBtn">
+                            <i class="bi bi-cart-plus"></i>
+                            <span>Add to Cart</span>
+                        </button>
+                    </div>
+                }
+                </form>
+
+                <!-- Additional Info -->
+                <div class="product-features mt-4">
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="bi bi-truck"></i>
+                        </div>
+                        <div class="feature-text">
+                            <div class="feature-title">Free Shipping</div>
+                            <div class="feature-description">On orders over $50</div>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="bi bi-arrow-repeat"></i>
+                        </div>
+                        <div class="feature-text">
+                            <div class="feature-title">30-Day Returns</div>
+                            <div class="feature-description">Money-back guarantee</div>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+                        <div class="feature-text">
+                            <div class="feature-title">2-Year Warranty</div>
+                            <div class="feature-description">Full coverage</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // ============================================
+        // PRODUCT DETAILS PAGE SPECIFIC JAVASCRIPT
+        // ============================================
+
+        // Add to Cart
+        document.getElementById('addToCartBtn').addEventListener('click', function() {
+            const quantity = parseInt(document.getElementById('quantityInput').value) || 1;
+        
+            /*
+            // Get current cart count and update
+            const badge = document.getElementById('cartBadge');
+            let currentCount = parseInt(badge.textContent) || 0;
+            updateCartBadge(currentCount + quantity);
+            */
+
+            // Visual feedback
+            
+            const btn = this;
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="bi bi-check2"></i><span>Added to Cart!</span>';
+
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+            }, 2000);
+
+            showToast(`${quantity} item(s) added to cart!`);
+
+        });
+        
+        
+        
+
+
+        // Thumbnail click handling
+        document.querySelectorAll('.thumbnail-item').forEach(thumbnail => {
+            thumbnail.addEventListener('click', function() {
+                // Remove active class from all thumbnails
+                document.querySelectorAll('.thumbnail-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+
+                // Add active class to clicked thumbnail
+                this.classList.add('active');
+            });
+        });
+
+        // Quantity input validation
+        document.getElementById('quantityInput').addEventListener('change', function() {
+            let value = parseInt(this.value) || 1;
+            if (value < 1) value = 1;
+            this.value = value;
+
+            const decreaseBtn = document.querySelector('.quantity-decrease');
+            decreaseBtn.disabled = value <= 1;
+        });
+
+    </script>
+}
